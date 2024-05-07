@@ -37,16 +37,17 @@ def try_get_art_size():
 def try_open_image(path):
     try:
         return PIL.Image.open(path)
-    except FileNotFoundError:
+    except (FileNotFoundError, IsADirectoryError):
         sys.exit('Не удалось найти файл, возможно указан некорректный путь')
     except PIL.UnidentifiedImageError:
         sys.exit('Некорретный формат файла')
 
 
 def try_get_mode():
-    mode_input = input("Выберите режим преобразования:\n"
+    mode_input = input("Режимы преобразования:\n"
                        "1 - классический (рекомендуется для просмотра на светлом фоне)\n"
-                       "2 - инверсия (рекомендуется для просмотра на темном фоне)\n")
+                       "2 - инверсия (рекомендуется для просмотра на темном фоне)\n"
+                       "Выберите режим: ")
     if mode_input in ["1", "2"]:
         return mode_input == "2"
     else:
@@ -65,18 +66,26 @@ def visualize(content, inversion_mode):
 
 
 def main():
+    print('-' * 100)
+    print("ASCII Art Converter by Aleksey Sakevich")
+    print('-' * 100)
     path = input("Введите путь до изображения: ")
     image = try_open_image(path)
+    print('-' * 100)
     art_width, art_height = try_get_art_size()
+    print('-' * 100)
     inversion_mode = try_get_mode()
+    print('-' * 100)
 
     resized_image = resize_image(image, art_width, art_height)
     ascii_art = convert_to_ascii(resized_image, art_width, inversion_mode)
 
-    filename = os.path.basename(path).split('.')[0]
-    with open(f"{filename}_ascii.txt", "w") as f:
+    source_filename = os.path.basename(path).split('.')[0]
+    result_file = f"{source_filename}_ascii.txt"
+    with open(result_file, "w") as f:
         f.write(ascii_art)
 
+    print(f'Изображение сохранено по адресу {os.path.abspath(result_file)}')
     visualize(ascii_art, inversion_mode)
 
 

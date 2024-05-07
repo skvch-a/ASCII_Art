@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import PIL.Image
+from tkinter import *
 
 
 def resize_image(image, new_width, new_height):
@@ -52,6 +53,17 @@ def try_get_mode():
         exit()
 
 
+def visualize(content, inversion_mode):
+    foreground = "black"
+    background = "white"
+    if inversion_mode:
+        foreground, background = background, foreground
+    window = Tk()
+    window.title("ASCII Art")
+    Label(window, text=content, anchor='w', font="courier", bg=background, fg=foreground).pack()
+    window.mainloop()
+
+
 def main():
     path = input("Введите путь до изображения: ")
     image = try_open_image(path)
@@ -59,14 +71,13 @@ def main():
     inversion_mode = try_get_mode()
 
     resized_image = resize_image(image, art_width, art_height)
-    ascii_image = convert_to_ascii(resized_image, art_width, inversion_mode)
-
-    print(ascii_image)
+    ascii_art = convert_to_ascii(resized_image, art_width, inversion_mode)
 
     filename = os.path.basename(path).split('.')[0]
     with open(f"{filename}_ascii.txt", "w") as f:
-        f.write(ascii_image)
+        f.write(ascii_art)
 
+    visualize(ascii_art, inversion_mode)
 
 if __name__ == "__main__":
     main()

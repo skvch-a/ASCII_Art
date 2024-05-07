@@ -14,7 +14,7 @@ def resize_image(image, new_width, new_height):
 
 
 def convert_to_ascii(image, art_width, inversion_mode):
-    ASCII_chars = ["¶", "@", "#", "S", "%", "?", "*", "!", "+", ";", ":", ",", ".", "`"]
+    ASCII_chars = ["¶", "@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", "`"]
     if inversion_mode:
         ASCII_chars.reverse()
     grayscale_image = image.convert("L")

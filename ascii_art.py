@@ -14,19 +14,19 @@ def resize_image(image, new_width, new_height):
 
 
 def convert_to_ascii(image, art_width, inversion_mode):
-    ASCII_chars = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."]
+    ASCII_chars = ["¶", "@", "#", "S", "%", "?", "*", "!", "+", ";", ":", ",", ".", "`"]
     if inversion_mode:
         ASCII_chars.reverse()
     grayscale_image = image.convert("L")
     pixels = grayscale_image.getdata()
-    art_data = "".join([ASCII_chars[pixel // 25] for pixel in pixels])
+    art_data = "".join([ASCII_chars[pixel // 20] for pixel in pixels])
     result = "\n".join([art_data[index:(index + art_width)] for index in range(0, len(art_data), art_width)])
     return result
 
 
 def try_get_art_size():
     try:
-        art_width = int(input("Введите ширину ASCII_Art в символах (рекомендуется 100): "))
+        art_width = int(input("Введите ширину ASCII_Art в символах (рекомендуется 120): "))
         art_height = int(input("Введите высоту ASCII_Art в символах (для автоподбора высоты введите 0): "))
     except ValueError:
         print('Некорректный ввод')
@@ -37,7 +37,7 @@ def try_get_art_size():
 def try_open_image(path):
     try:
         return PIL.Image.open(path)
-    except PIL.UnidentifiedImageError:
+    except:
         print('Не удалось открыть изображение, возможно указан некорректный путь')
         exit()
 

@@ -14,8 +14,9 @@ def resize_image(image, new_width, new_height):
     return resized_image
 
 
-def convert_to_ascii(image, art_width, inversion_mode):
+def convert_to_ascii(image, inversion_mode):
     ASCII_chars = ["¶", "@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", "`"]
+    art_width = image.size[0]
     if inversion_mode:
         ASCII_chars.reverse()
     grayscale_image = image.convert("L")
@@ -25,13 +26,13 @@ def convert_to_ascii(image, art_width, inversion_mode):
     return result
 
 
-def try_get_art_size():
+def try_input_size_and_get_resized_image(image):
     try:
         art_width = int(input("Введите ширину ASCII_Art в символах (рекомендуется 120): "))
         art_height = int(input("Введите высоту ASCII_Art в символах (для автоподбора высоты введите 0): "))
+        return resize_image(image, art_width, art_height)
     except ValueError:
         sys.exit('Некорректный ввод')
-    return art_width, art_height
 
 
 def try_open_image(path):
@@ -72,14 +73,12 @@ def main():
     path = input("Введите путь до изображения: ")
     image = try_open_image(path)
     print('-' * 100)
-    art_width, art_height = try_get_art_size()
+    resized_image = try_input_size_and_get_resized_image(image)
     print('-' * 100)
     inversion_mode = try_get_mode()
     print('-' * 100)
 
-    resized_image = resize_image(image, art_width, art_height)
-    ascii_art = convert_to_ascii(resized_image, art_width, inversion_mode)
-
+    ascii_art = convert_to_ascii(resized_image, inversion_mode)
     source_filename = os.path.basename(path).split('.')[0]
     result_file = f"{source_filename}_ascii.txt"
     with open(result_file, "w") as f:

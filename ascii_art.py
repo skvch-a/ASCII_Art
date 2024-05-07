@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import PIL
 import PIL.Image
 
 
@@ -56,7 +55,7 @@ def try_get_mode():
 def main():
     path = input("Введите путь до изображения: ")
     image = try_open_image(path)
-    (art_width, art_height) = try_get_art_size()
+    art_width, art_height = try_get_art_size()
     inversion_mode = try_get_mode()
 
     resized_image = resize_image(image, art_width, art_height)

@@ -1,0 +1,6 @@
+# Ignore everything
+*
+# Except...
+!.gitignore
+!ascii_art.py
+!README.md

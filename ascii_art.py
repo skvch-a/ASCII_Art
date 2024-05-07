@@ -66,17 +66,23 @@ def visualize(content, inversion_mode):
     window.mainloop()
 
 
+def print_line():
+    print('-' * 100)
+
+
 def main():
-    print('-' * 100)
+    print_line()
     print("ASCII Art Converter by Aleksey Sakevich")
-    print('-' * 100)
+
+    print_line()
     path = input("Введите путь до изображения: ")
     image = try_open_image(path)
-    print('-' * 100)
+
+    print_line()
     resized_image = try_input_size_and_get_resized_image(image)
-    print('-' * 100)
+
+    print_line()
     inversion_mode = try_get_mode()
-    print('-' * 100)
 
     ascii_art = convert_to_ascii(resized_image, inversion_mode)
     source_filename = os.path.basename(path).split('.')[0]
@@ -84,6 +90,7 @@ def main():
     with open(result_file, "w") as f:
         f.write(ascii_art)
 
+    print_line()
     print(f'Изображение сохранено по адресу {os.path.abspath(result_file)}')
     visualize(ascii_art, inversion_mode)
 

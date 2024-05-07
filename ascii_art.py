@@ -13,54 +13,61 @@ def resize_image(image, new_width, new_height):
     return resized_image
 
 
-def convert_to_ascii(image, inversion_mode):
-    ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."]
+def convert_to_ascii(image, art_width, inversion_mode):
+    ASCII_chars = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."]
     if inversion_mode:
-        ASCII_CHARS.reverse()
+        ASCII_chars.reverse()
     grayscale_image = image.convert("L")
     pixels = grayscale_image.getdata()
-    characters = "".join([ASCII_CHARS[pixel // 25] for pixel in pixels])
-    return(characters)    
+    art_data = "".join([ASCII_chars[pixel // 25] for pixel in pixels])
+    result = "\n".join([art_data[index:(index + art_width)] for index in range(0, len(art_data), art_width)])
+    return result
+
 
 def try_get_art_size():
     try:
         art_width = int(input("Введите ширину ASCII_Art в символах (рекомендуется 100): "))
         art_height = int(input("Введите высоту ASCII_Art в символах (для автоподбора высоты введите 0): "))
-    except:
+    except ValueError:
         print('Некорректный ввод')
         exit()
-    return (art_width, art_height)
+    return art_width, art_height
+
 
 def try_open_image(path):
     try:
         return PIL.Image.open(path)
-    except:
+    except PIL.UnidentifiedImageError:
         print('Не удалось открыть изображение, возможно указан некорректный путь')
         exit()
 
+
 def try_get_mode():
-    mode_input = input("Выберите режим преобразования:\n1 - классический (рекомендуется для просмотра на светлом фоне)\n2 - инверсия (рекомендуется для просмотра на темном фоне)\n")
-    if (mode_input in ["1", "2"]):
+    mode_input = input("Выберите режим преобразования:\n"
+                       "1 - классический (рекомендуется для просмотра на светлом фоне)\n"
+                       "2 - инверсия (рекомендуется для просмотра на темном фоне)\n")
+    if mode_input in ["1", "2"]:
         return mode_input == "2"
     else:
         print('Некорректный ввод')
         exit()
 
+
 def main():
     path = input("Введите путь до изображения: ")
-    
     image = try_open_image(path)
-    (new_width, new_height) = try_get_art_size()
+    (art_width, art_height) = try_get_art_size()
     inversion_mode = try_get_mode()
 
-    new_image_data = convert_to_ascii(resize_image(image, new_width, new_height), inversion_mode) 
-    ascii_image = "\n".join([new_image_data[index:(index + new_width)] for index in range(0, len(new_image_data), new_width)])
-    
+    resized_image = resize_image(image, art_width, art_height)
+    ascii_image = convert_to_ascii(resized_image, art_width, inversion_mode)
+
     print(ascii_image)
 
     filename = os.path.basename(path).split('.')[0]
     with open(f"{filename}_ascii.txt", "w") as f:
         f.write(ascii_image)
+
 
 if __name__ == "__main__":
     main()

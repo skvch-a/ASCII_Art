@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import os
+import sys
 import PIL.Image
-from tkinter import *
+from tkinter import Tk, Label
 
 
 def resize_image(image, new_width, new_height):
@@ -29,8 +30,7 @@ def try_get_art_size():
         art_width = int(input("Введите ширину ASCII_Art в символах (рекомендуется 120): "))
         art_height = int(input("Введите высоту ASCII_Art в символах (для автоподбора высоты введите 0): "))
     except ValueError:
-        print('Некорректный ввод')
-        exit()
+        sys.exit('Некорректный ввод')
     return art_width, art_height
 
 
@@ -38,8 +38,7 @@ def try_open_image(path):
     try:
         return PIL.Image.open(path)
     except:
-        print('Не удалось открыть изображение, возможно указан некорректный путь')
-        exit()
+        sys.exit('Не удалось открыть изображение, возможно указан некорректный путь')
 
 
 def try_get_mode():
@@ -49,8 +48,7 @@ def try_get_mode():
     if mode_input in ["1", "2"]:
         return mode_input == "2"
     else:
-        print('Некорректный ввод')
-        exit()
+        sys.exit('Некорректный ввод')
 
 
 def visualize(content, inversion_mode):
@@ -78,6 +76,7 @@ def main():
         f.write(ascii_art)
 
     visualize(ascii_art, inversion_mode)
+
 
 if __name__ == "__main__":
     main()

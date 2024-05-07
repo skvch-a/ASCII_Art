@@ -37,8 +37,10 @@ def try_get_art_size():
 def try_open_image(path):
     try:
         return PIL.Image.open(path)
-    except:
-        sys.exit('Не удалось открыть изображение, возможно указан некорректный путь')
+    except FileNotFoundError:
+        sys.exit('Не удалось найти файл, возможно указан некорректный путь')
+    except PIL.UnidentifiedImageError:
+        sys.exit('Некорретный формат файла')
 
 
 def try_get_mode():

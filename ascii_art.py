@@ -19,7 +19,7 @@ def convert_to_ascii(image, art_width, inversion_mode):
     grayscale_image = image.convert("L")
     pixels = grayscale_image.getdata()
     art_data = "".join([ASCII_chars[pixel // 20] for pixel in pixels])
-    result = "\n".join([art_data[index:(index + art_width)] for index in range(0, len(art_data), art_width)])
+    result = "\n".join([art_data[str_start_index:str_start_index + art_width] for str_start_index in range(0, len(art_data), art_width)])
     return result
 
 

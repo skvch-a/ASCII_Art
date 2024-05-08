@@ -8,7 +8,8 @@ from tkinter import Tk, Label
 def resize_image(image, new_width, new_height):
     width, height = image.size
     if new_height == 0:
-        ratio = height / width / 2
+        symbol_ratio = 2
+        ratio = height / width / symbol_ratio
         new_height = int(new_width * ratio)
     resized_image = image.resize((new_width, new_height))
     return resized_image
@@ -16,19 +17,19 @@ def resize_image(image, new_width, new_height):
 
 def convert_to_ascii(image, inversion_mode):
     ASCII_chars = ["¶", "@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", "`"]
-    art_width = image.size[0]
+    width = image.size[0]
     if inversion_mode:
         ASCII_chars.reverse()
     grayscale_image = image.convert("L")
     pixels = grayscale_image.getdata()
     art_data = "".join([ASCII_chars[pixel // 20] for pixel in pixels])
-    result = "\n".join([art_data[str_start_index:str_start_index + art_width] for str_start_index in range(0, len(art_data), art_width)])
+    result = "\n".join([art_data[str_start_index:str_start_index + width] for str_start_index in range(0, len(art_data), width)])
     return result
 
 
 def try_input_size_and_get_resized_image(image):
     try:
-        art_width = int(input("Введите ширину ASCII_Art в символах (рекомендуется 120): "))
+        art_width = int(input("Введите ширину ASCII_Art в символах (рекомендуется 100 - 500): "))
         art_height = int(input("Введите высоту ASCII_Art в символах (для автоподбора высоты введите 0): "))
         return resize_image(image, art_width, art_height)
     except ValueError:
@@ -62,7 +63,7 @@ def visualize(content, inversion_mode):
         foreground, background = background, foreground
     window = Tk()
     window.title("ASCII Art")
-    Label(window, text=content, anchor='w', font="courier", bg=background, fg=foreground).pack()
+    Label(window, text=content, anchor='w', font="courier 4",  bg=background, fg=foreground).pack()
     window.mainloop()
 
 

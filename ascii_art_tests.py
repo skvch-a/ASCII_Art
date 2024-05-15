@@ -1,4 +1,5 @@
 import pytest
+import os
 import PIL.Image
 import ascii_art as art
 
@@ -31,3 +32,6 @@ def test_inversion_mode():
     assert ascii_art == "``\n``"
 
 
+def test_save_result():
+    art.save_result('###', 'test_save_result.txt')
+    assert os.path.exists('test_save_result_ascii.txt')

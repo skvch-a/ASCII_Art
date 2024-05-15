@@ -4,4 +4,5 @@
 !.gitignore
 !requirements.txt
 !ascii_art.py
+!ascii_art_tests.py
 !README.md

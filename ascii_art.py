@@ -67,6 +67,14 @@ def visualize(content, inversion_mode):
     window.mainloop()
 
 
+def save_result(ascii_art, original_image_path):
+    source_filename = os.path.basename(original_image_path).split('.')[0]
+    result_filename = f"{source_filename}_ascii.txt"
+    with open(result_filename, "w") as f:
+        f.write(ascii_art)
+    print(f'Изображение сохранено по адресу {os.path.abspath(result_filename)}')
+
+
 def print_line():
     print('-' * 100)
 
@@ -84,20 +92,13 @@ def main():
 
     print_line()
     inversion_mode = try_get_mode()
-
     ascii_art = convert_to_ascii(resized_image, inversion_mode)
-    source_filename = os.path.basename(path).split('.')[0]
-    result_file = f"{source_filename}_ascii.txt"
-    with open(result_file, "w") as f:
-        f.write(ascii_art)
-
-    print_line()
-    print(f'Изображение сохранено по адресу {os.path.abspath(result_file)}')
+    save_result(ascii_art, path)
     visualize(ascii_art, inversion_mode)
 
 
 if __name__ == "__main__":
-    if len (sys.argv) > 1 and (sys.argv[1] == '-h' or sys.argv[1] == '--help'):
+    if len(sys.argv) > 1 and (sys.argv[1] == '-h' or sys.argv[1] == '--help'):
         print("ASCII Art Converter by Aleksey Sakevich\n"
               "Консольное приложение, преобразующее изображение в ASCII Art\n"
               "Поддерживаемые форматы - .PNG, .JPEG, .PPM, .GIF, .TIFF, .BMP\n"

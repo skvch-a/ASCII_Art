@@ -97,4 +97,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len (sys.argv) > 1 and (sys.argv[1] == '-h' or sys.argv[1] == '--help'):
+        print("ASCII Art Converter by Aleksey Sakevich\n"
+              "Консольное приложение, преобразующее изображение в ASCII Art\n"
+              "Поддерживаемые форматы - .PNG, .JPEG, .PPM, .GIF, .TIFF, .BMP\n"
+              "Результаты работы сохраняются в папке с этой программой")
+    else:
+        main()

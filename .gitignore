@@ -2,6 +2,6 @@
 *
 # Except...
 !.gitignore
-!.requirements.txt
+!requirements.txt
 !ascii_art.py
 !README.md

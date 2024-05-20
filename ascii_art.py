@@ -7,7 +7,6 @@ from tkinter import Tk, Label
 
 NAME = 'ASCII Art Converter by Aleksey Sakevich'
 ASCII_CHARS = ['¶', '@', '#', 'S', '%', '?', '*', '+', ';', ':', ',', '.', '`']
-SYMBOL_RATIO = 2
 
 MODE_INPUT_MESSAGE = ('Режимы преобразования:\n'
                       '1 - классический (рекомендуется для просмотра на светлом фоне)\n'
@@ -26,7 +25,9 @@ HELP_MESSAGE = ('ASCII Art Converter by Aleksey Sakevich\n\n'
                 'тогда программа попросит ввести оставшиеся данные в консольном приложении.\n'
                 'Но если передать --width и не передавать --height, программа подберет высоту автоматически.\n'
                 'Если не передавать --width, программа попросит ввести размеры в приложении,'
-                'вне зависимости от наличия флага --height.')
+                'вне зависимости от наличия флага --height.\n\n'
+                'По умолчанию стоит шрифт "courier 4" и менять его не рекомендуется\n' 
+                'Если вы все-таки решили поменять шрифт, убедитесь что он моноширинный и его размер не меньше 2\n')
 
 WIDTH_HELP_MESSAGE = 'Ширина ASCII Art в символах'
 HEIGHT_HELP_MESSAGE = 'Высота ASCII Art в символах'
@@ -44,6 +45,7 @@ INCORRECT_FORMAT_ERROR_MESSAGE = 'Некорретный формат файла
 
 DEFAULT_VISUALIZER_FOREGROUND = 'black'
 DEFAULT_VISUALIZER_BACKGROUND = 'white'
+SYMBOL_RATIO = 2
 
 
 def print_line():

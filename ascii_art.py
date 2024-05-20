@@ -5,9 +5,15 @@ import PIL.Image
 from argparse import ArgumentParser, RawTextHelpFormatter
 from tkinter import Tk, Label
 
-
 NAME = "ASCII Art Converter by Aleksey Sakevich"
+ASCII_CHARS = ["¶", "@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", "`"]
 SYMBOL_RATIO = 2
+
+MODE_INPUT_MESSAGE = ("Режимы преобразования:\n"
+                      "1 - классический (рекомендуется для просмотра на светлом фоне)\n"
+                      "2 - инверсия (рекомендуется для просмотра на темном фоне)\n"
+                      "Выберите режим: ")
+
 HELP_MESSAGE = ("ASCII Art Converter by Aleksey Sakevich\n\n"
                 "Консольное приложение, преобразующее изображение в ASCII Art\n"
                 "Поддерживаемые форматы - .PNG, .JPEG, .PPM, .GIF, .TIFF, .BMP\n"
@@ -23,6 +29,18 @@ HELP_MESSAGE = ("ASCII Art Converter by Aleksey Sakevich\n\n"
                 "вне зависимости от наличия флага --height.")
 
 
+def convert_to_ascii(image, inversion_mode):
+    chars = ASCII_CHARS
+    width = image.size[0]
+    if inversion_mode:
+        chars = list(reversed(ASCII_CHARS))
+    grayscale_image = image.convert("L")
+    pixels = grayscale_image.getdata()
+    art_data = "".join([chars[pixel // 20] for pixel in pixels])
+    result = "\n".join([art_data[line_start:line_start + width] for line_start in range(0, len(art_data), width)])
+    return result
+
+
 def resize_image(image, new_width, new_height):
     width, height = image.size
     if new_height == 0:
@@ -32,37 +50,29 @@ def resize_image(image, new_width, new_height):
     return resized_image
 
 
-def convert_to_ascii(image, inversion_mode):
-    ASCII_chars = ["¶", "@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", "`"]
-    width = image.size[0]
-    if inversion_mode:
-        ASCII_chars.reverse()
-    grayscale_image = image.convert("L")
-    pixels = grayscale_image.getdata()
-    art_data = "".join([ASCII_chars[pixel // 20] for pixel in pixels])
-    result = "\n".join([art_data[line_start:line_start + width] for line_start in range(0, len(art_data), width)])
-    return result
-
-
-def try_resize_image(image, new_size):
+def try_resize_image(image, width_from_args, height_from_args):
     try:
-        new_width, new_height = new_size
-        return resize_image(image, new_width, new_height)
+        if width_from_args == 0:
+            print_line()
+            art_width = int(input("Введите ширину ASCII_Art в символах (рекомендуется 100 - 500): "))
+            art_height = int(input("Введите высоту ASCII_Art в символах (для автоподбора высоты введите 0): "))
+        else:
+            art_width, art_height = width_from_args, height_from_args
+        return resize_image(image, art_width, art_height)
     except ValueError:
         sys.exit('Некорректный ввод')
 
 
-def try_input_size():
-    try:
+def try_get_path(path_from_args):
+    if path_from_args == '':
         print_line()
-        art_width = int(input("Введите ширину ASCII_Art в символах (рекомендуется 100 - 500): "))
-        art_height = int(input("Введите высоту ASCII_Art в символах (для автоподбора высоты введите 0): "))
-        return art_width, art_height
-    except ValueError:
-        sys.exit('Некорректный ввод')
- 
-        
-def try_open_image(path):
+        path = input("Введите путь до изображения: ")
+    else:
+        path = path_from_args
+    return path
+
+
+def try_get_image(path):
     try:
         return PIL.Image.open(path)
     except (FileNotFoundError, IsADirectoryError):
@@ -74,13 +84,10 @@ def try_open_image(path):
 def try_get_mode(mode_from_args):
     if mode_from_args == '':
         print_line()
-        mode_input = input("Режимы преобразования:\n"
-                        "1 - классический (рекомендуется для просмотра на светлом фоне)\n"
-                        "2 - инверсия (рекомендуется для просмотра на темном фоне)\n"
-                        "Выберите режим: ")
+        mode_input = input(MODE_INPUT_MESSAGE)
     else:
         mode_input = mode_from_args
-        
+
     if mode_input in ["1", "2"]:
         return mode_input == "2"
     else:
@@ -119,27 +126,16 @@ def parse_cmd_args():
     return vars(parser.parse_args())
 
 
-
 def main():
     args = parse_cmd_args()
     print_line()
     print(NAME)
 
-    if args['path'] == '':
-        print_line()
-        path = input("Введите путь до изображения: ")
-    else:
-        path = args['path']
-    image = try_open_image(path)   
-
-    if args['width'] == 0:
-        art_size = try_input_size()
-    else:
-        art_size = args['width'], args['height']
-    resized_image = try_resize_image(image, art_size)
-
+    path = try_get_path(args['path'])
+    image = try_get_image(path)
+    resized_image = try_resize_image(image, args['width'], args['height'])
     inversion_mode = try_get_mode(args['mode'])
-    
+
     ascii_art = convert_to_ascii(resized_image, inversion_mode)
     save_result(ascii_art, path)
     visualize(ascii_art, inversion_mode)

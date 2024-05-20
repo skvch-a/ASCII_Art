@@ -28,10 +28,11 @@ HELP_MESSAGE = ('ASCII Art Converter by Aleksey Sakevich\n\n'
                 'Если не передавать --width, программа попросит ввести размеры в приложении,'
                 'вне зависимости от наличия флага --height.')
 
-WIDTH_HELP_MESSAGE = 'Ширина для ASCII Art в символах'
-HEIGHT_HELP_MESSAGE = 'Высота для ASCII Art в символах'
+WIDTH_HELP_MESSAGE = 'Ширина ASCII Art в символах'
+HEIGHT_HELP_MESSAGE = 'Высота ASCII Art в символах'
 MODE_HELP_MESSAGE = 'Режим работы (1 - обычный, 2 - инверсия)'
 PATH_HELP_MESSAGE = 'Путь до изображения'
+FONT_HELP_MESSAGE = 'Шрифт для визуализации, по умолчанию стоит courier размера 4 (менять не рекомендуется)'
 
 PATH_INPUT_MESSAGE = 'Введите путь до изображения: '
 WIDTH_INPUT_MESSAGE = 'Введите ширину ASCII_Art в символах (рекомендуется 100 - 500): '
@@ -43,7 +44,7 @@ INCORRECT_FORMAT_ERROR_MESSAGE = 'Некорретный формат файла
 
 DEFAULT_VISUALIZER_FOREGROUND = 'black'
 DEFAULT_VISUALIZER_BACKGROUND = 'white'
-FONT = 'courier 4'
+
 
 def print_line():
     print('-' * 100)
@@ -114,14 +115,14 @@ def try_get_mode(mode_from_args):
         sys.exit(INPUT_ERROR_MESSAGE)
 
 
-def visualize(content, inversion_mode):
+def visualize(content, inversion_mode, font):
     foreground = DEFAULT_VISUALIZER_FOREGROUND
     background = DEFAULT_VISUALIZER_BACKGROUND
     if inversion_mode:
         foreground, background = background, foreground
     window = Tk()
     window.title(NAME)
-    Label(window, text=content, anchor='w', font=FONT, bg=background, fg=foreground).pack()
+    Label(window, text=content, anchor='w', font=font, bg=background, fg=foreground).pack()
     window.mainloop()
 
 
@@ -139,6 +140,7 @@ def parse_cmd_args():
     parser.add_argument('--height', type=int, default=0, help=HEIGHT_HELP_MESSAGE)
     parser.add_argument('--mode', type=str, default='', help=MODE_HELP_MESSAGE)
     parser.add_argument('--path', type=str, default='', help=PATH_HELP_MESSAGE)
+    parser.add_argument('--font', type=str, default='courier 4', help=FONT_HELP_MESSAGE)
     return vars(parser.parse_args())
 
 
@@ -154,7 +156,7 @@ def main():
     
     ascii_art = convert_to_ascii(resized_image, inversion_mode)
     save_result(ascii_art, path)
-    visualize(ascii_art, inversion_mode)
+    visualize(ascii_art, inversion_mode, args['font'])
 
 
 if __name__ == '__main__':

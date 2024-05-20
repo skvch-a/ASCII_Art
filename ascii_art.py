@@ -2,7 +2,7 @@
 import os
 import sys
 import PIL.Image
-import argparse
+from argparse import ArgumentParser, RawTextHelpFormatter
 from tkinter import Tk, Label
 
 
@@ -16,10 +16,10 @@ HELP_MESSAGE = ("ASCII Art Converter by Aleksey Sakevich\n\n"
                 "Есть возможность передачи параметров сразу через командную строку\n"
                 "Пример (без автоподбора высоты): ./ascii_art.py --width=200 --height=200 --mode=1 --path=/path\n"
                 "Пример (с автоподбором высоты): ./ascii_art.py --width=200 --mode=1 --path=/path\n\n"
-                "Можно передавать параметры частично (например только --path),\n"
+                "Можно передавать параметры частично (например только --path),"
                 "тогда программа попросит ввести оставшиеся данные в консольном приложении.\n"
                 "Но если передать --width и не передавать --height, программа подберет высоту автоматически.\n"
-                "Если не передавать --width, программа попросит ввести размеры в приложении,\n"
+                "Если не передавать --width, программа попросит ввести размеры в приложении,"
                 "вне зависимости от наличия флага --height.")
 
 
@@ -111,7 +111,7 @@ def print_line():
 
 
 def parse_cmd_args():
-    parser = argparse.ArgumentParser(description=HELP_MESSAGE, formatter_class=argparse.RawTextHelpFormatter)
+    parser = ArgumentParser(description=HELP_MESSAGE, formatter_class=RawTextHelpFormatter)
     parser.add_argument('--width', type=int, default=0, help='Ширина для ASCII Art в символах')
     parser.add_argument('--height', type=int, default=0, help='Высота для ASCII Art в символах')
     parser.add_argument('--mode', type=str, default='', help='Режим работы (1 - обычный, 2 - инверсия)')

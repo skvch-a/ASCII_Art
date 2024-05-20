@@ -6,12 +6,12 @@ import ascii_art as art
 
 def test_incorrect_path():
     with pytest.raises(SystemExit):
-        art.try_open_image('/some//incorrect/path!!')
+        art.try_get_image('/some//incorrect/path!!')
 
 
 def test_incorrect_format():
     with pytest.raises(SystemExit):
-        art.try_open_image('README.md')
+        art.try_get_image('README.md')
 
 
 def test_resize_image():

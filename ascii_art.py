@@ -4,6 +4,7 @@ import sys
 import PIL.Image
 from argparse import ArgumentParser, RawTextHelpFormatter
 from tkinter import Tk, Label
+from typing import Dict, Any
 
 NAME = 'ASCII Art Converter by Aleksey Sakevich'
 ASCII_CHARS = ['¶', '@', '#', 'S', '%', '?', '*', '+', ';', ':', ',', '.', '`']
@@ -52,7 +53,7 @@ def print_line():
     print('-' * 100)
     
     
-def convert_to_ascii(image, inversion_mode):
+def convert_to_ascii(image: PIL.Image.Image, inversion_mode: bool) -> str:
     chars = ASCII_CHARS
     width = image.size[0]
     if inversion_mode:
@@ -64,7 +65,7 @@ def convert_to_ascii(image, inversion_mode):
     return result
 
 
-def resize_image(image, new_width, new_height):
+def resize_image(image: PIL.Image.Image, new_width: int, new_height: int) -> PIL.Image.Image:
     width, height = image.size
     if new_height == 0:
         ratio = height / width / SYMBOL_RATIO
@@ -73,7 +74,7 @@ def resize_image(image, new_width, new_height):
     return resized_image
 
 
-def try_resize_image(image, width_from_args, height_from_args):
+def try_resize_image(image: PIL.Image.Image, width_from_args: int, height_from_args: int) -> PIL.Image.Image:
     try:
         if width_from_args == 0:
             print_line()
@@ -86,7 +87,7 @@ def try_resize_image(image, width_from_args, height_from_args):
         sys.exit(INPUT_ERROR_MESSAGE)
 
 
-def try_get_path(path_from_args):
+def try_get_path(path_from_args: str) -> str:
     if path_from_args == '':
         print_line()
         path = input(PATH_INPUT_MESSAGE)
@@ -95,16 +96,16 @@ def try_get_path(path_from_args):
     return path
 
 
-def try_get_image(path):
+def try_get_image(path: str) -> PIL.Image:
     try:
         return PIL.Image.open(path)
     except (FileNotFoundError, IsADirectoryError):
         sys.exit(FILE_NOT_FOUND_ERROR_MESSAGE)
-    except PIL.UnidentifiedImageError:
+    except PIL.Image.UnidentifiedImageError:
         sys.exit(INCORRECT_FORMAT_ERROR_MESSAGE)
 
 
-def try_get_mode(mode_from_args):
+def try_get_mode(mode_from_args: str) -> bool:
     if mode_from_args == '':
         print_line()
         mode_input = input(MODE_INPUT_MESSAGE)
@@ -117,7 +118,7 @@ def try_get_mode(mode_from_args):
         sys.exit(INPUT_ERROR_MESSAGE)
 
 
-def visualize(content, inversion_mode, font):
+def visualize(content: str, inversion_mode: bool, font: str) -> None:
     foreground = DEFAULT_VISUALIZER_FOREGROUND
     background = DEFAULT_VISUALIZER_BACKGROUND
     if inversion_mode:
@@ -128,7 +129,7 @@ def visualize(content, inversion_mode, font):
     window.mainloop()
 
 
-def save_result(ascii_art, original_image_path):
+def save_result(ascii_art: str, original_image_path: str) -> None:
     source_filename = os.path.basename(original_image_path).split('.')[0]
     result_filename = f'{source_filename}_ascii.txt'
     with open(result_filename, 'w') as f:
@@ -136,7 +137,7 @@ def save_result(ascii_art, original_image_path):
     print(f'Изображение сохранено по адресу {os.path.abspath(result_filename)}')
 
 
-def parse_cmd_args():
+def parse_cmd_args() -> Dict[str, Any]:
     parser = ArgumentParser(description=HELP_MESSAGE, formatter_class=RawTextHelpFormatter)
     parser.add_argument('--width', type=int, default=0, help=WIDTH_HELP_MESSAGE)
     parser.add_argument('--height', type=int, default=0, help=HEIGHT_HELP_MESSAGE)
@@ -147,16 +148,16 @@ def parse_cmd_args():
 
 
 def main():
-    args = parse_cmd_args()
+    args: Dict[str, Any] = parse_cmd_args()
     print_line()
     print(NAME)
 
-    path = try_get_path(args['path'])
-    image = try_get_image(path)
-    resized_image = try_resize_image(image, args['width'], args['height'])
-    inversion_mode = try_get_mode(args['mode'])
+    path: str = try_get_path(args['path'])
+    image: PIL.Image.Image = try_get_image(path)
+    resized_image: PIL.Image.Image = try_resize_image(image, args['width'], args['height'])
+    inversion_mode: bool = try_get_mode(args['mode'])
     
-    ascii_art = convert_to_ascii(resized_image, inversion_mode)
+    ascii_art: str = convert_to_ascii(resized_image, inversion_mode)
     save_result(ascii_art, path)
     visualize(ascii_art, inversion_mode, args['font'])
 

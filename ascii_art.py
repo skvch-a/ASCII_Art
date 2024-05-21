@@ -3,16 +3,11 @@ import os
 import sys
 import PIL.Image
 from argparse import ArgumentParser, RawTextHelpFormatter
-from tkinter import Tk, Label
 from typing import Dict, Any
+from tkinter import Tk, Label
 
-NAME = 'ASCII Art Converter by Aleksey Sakevich'
+TITLE = 'ASCII Art Converter by Aleksey Sakevich'
 ASCII_CHARS = ['¶', '@', '#', 'S', '%', '?', '*', '+', ';', ':', ',', '.', '`']
-
-MODE_INPUT_MESSAGE = ('Режимы преобразования:\n'
-                      '1 - классический (рекомендуется для просмотра на светлом фоне)\n'
-                      '2 - инверсия (рекомендуется для просмотра на темном фоне)\n'
-                      'Выберите режим: ')
 
 HELP_MESSAGE = ('ASCII Art Converter by Aleksey Sakevich\n\n'
                 'Консольное приложение, преобразующее изображение в ASCII Art\n'
@@ -39,6 +34,10 @@ FONT_HELP_MESSAGE = 'Шрифт для визуализации, по умолч
 PATH_INPUT_MESSAGE = 'Введите путь до изображения: '
 WIDTH_INPUT_MESSAGE = 'Введите ширину ASCII_Art в символах (рекомендуется 100 - 500): '
 HEIGHT_INPUT_MESSAGE = 'Введите высоту ASCII_Art в символах (для автоподбора высоты введите 0): '
+MODE_INPUT_MESSAGE = ('Режимы преобразования:\n'
+                      '1 - классический (рекомендуется для просмотра на светлом фоне)\n'
+                      '2 - инверсия (рекомендуется для просмотра на темном фоне)\n'
+                      'Выберите режим: ')
 
 INPUT_ERROR_MESSAGE = 'Некорректный ввод'
 FILE_NOT_FOUND_ERROR_MESSAGE = 'Не удалось найти файл, возможно указан некорректный путь'
@@ -53,7 +52,17 @@ def print_line():
     print('-' * 100)
     
     
-def convert_to_ascii(image: PIL.Image.Image, inversion_mode: bool) -> str:
+def convert_to_ascii(image: PIL.Image, inversion_mode: bool) -> str:
+    """
+    Конвертирует изображение в ASCII Art
+
+    Параметры:
+        image (PIL.Image): исходное изображение
+        inversion_mode (bool): режим работы (False - обычный, True - инверсия)
+
+    Возвращаемое значение:
+        str: ASCII Art
+    """    
     chars = ASCII_CHARS
     width = image.size[0]
     if inversion_mode:
@@ -65,7 +74,14 @@ def convert_to_ascii(image: PIL.Image.Image, inversion_mode: bool) -> str:
     return result
 
 
-def resize_image(image: PIL.Image.Image, new_width: int, new_height: int) -> PIL.Image.Image:
+def resize_image(image: PIL.Image, new_width: int, new_height: int) -> PIL.Image:
+    """
+    Изменяет размер изображения по введенным параметрам. 
+    Если new_height == 0, расчитывает высоту автоматически, сохраняя соотношение сторон для ASCII Art
+        
+    Возвращаемое значение:
+        PIL.Image: изображение с измененным размером
+    """    
     width, height = image.size
     if new_height == 0:
         ratio = height / width / SYMBOL_RATIO
@@ -74,7 +90,19 @@ def resize_image(image: PIL.Image.Image, new_width: int, new_height: int) -> PIL
     return resized_image
 
 
-def try_resize_image(image: PIL.Image.Image, width_from_args: int, height_from_args: int) -> PIL.Image.Image:
+def try_resize_image(image: PIL.Image, width_from_args: int, height_from_args: int) -> PIL.Image:
+    """
+    Изменяет размер изображения по введенным параметрам, если они корректны, иначе завершает программу.
+    Если параметры не передавались в терминале при запуске, просит пользователя их ввести.
+
+    Параметры:
+        image (PIL.Image): исходное изображение
+        width_from_args (int): ширина для ASCII Art, введенная при запуске в консоли
+        height_from_args (int): высота для ASCII Art, введенная при запуске в консоли
+        
+    Возвращаемое значение:
+        PIL.Image: изображение с измененным размером
+    """    
     try:
         if width_from_args == 0:
             print_line()
@@ -88,6 +116,15 @@ def try_resize_image(image: PIL.Image.Image, width_from_args: int, height_from_a
 
 
 def try_get_path(path_from_args: str) -> str:
+    """
+    Просит пользователя ввести путь до изображения, если при запуске в терминале ничего не было указано
+
+    Параметры:
+        path_from_args (str): путь, введенный при запуске в консоли
+
+    Возвращаемое значение:
+        str: путь до изображения
+    """    
     if path_from_args == '':
         print_line()
         path = input(PATH_INPUT_MESSAGE)
@@ -97,15 +134,31 @@ def try_get_path(path_from_args: str) -> str:
 
 
 def try_get_image(path: str) -> PIL.Image:
+    """
+    Возвращает изображение по введенному пути, если он корректен, иначе завершает программу
+
+    Параметры:
+        path (str): путь до изображения
+    """    
     try:
         return PIL.Image.open(path)
     except (FileNotFoundError, IsADirectoryError):
         sys.exit(FILE_NOT_FOUND_ERROR_MESSAGE)
-    except PIL.Image.UnidentifiedImageError:
+    except PIL.UnidentifiedImageError:
         sys.exit(INCORRECT_FORMAT_ERROR_MESSAGE)
 
 
 def try_get_mode(mode_from_args: str) -> bool:
+    """
+    Просит пользователя ввести режим работы, если при запуске в терминале ничего не было указано.
+    Если введен некорректный режим, завершает программу
+
+    Параметры:
+        mode_from_args (str): режим работы, введенный при запуске в консоли
+
+    Возвращаемое значение:
+        bool: режим работы (False - обычный, True - инверсия)
+    """    
     if mode_from_args == '':
         print_line()
         mode_input = input(MODE_INPUT_MESSAGE)
@@ -119,17 +172,32 @@ def try_get_mode(mode_from_args: str) -> bool:
 
 
 def visualize(content: str, inversion_mode: bool, font: str) -> None:
+    """
+    Визуализирует ASCII Art в оконном приложении
+
+    Параметры:
+        content (str): ASCII Art
+        inversion_mode (bool): режим работы (False - обычный, True - инверсия)
+        font (str): шрифт для визуализации
+    """    
     foreground = DEFAULT_VISUALIZER_FOREGROUND
     background = DEFAULT_VISUALIZER_BACKGROUND
     if inversion_mode:
         foreground, background = background, foreground
     window = Tk()
-    window.title(NAME)
+    window.title(TITLE)
     Label(window, text=content, anchor='w', font=font, bg=background, fg=foreground).pack()
     window.mainloop()
 
 
 def save_result(ascii_art: str, original_image_path: str) -> None:
+    """
+    Сохраняет ASCII Art в папку со скриптом
+
+    Параметры:
+        ascii_art (str): ASCII Art
+        original_image_path (str): путь до исходного изображения (для получения названия файла)
+    """    
     source_filename = os.path.basename(original_image_path).split('.')[0]
     result_filename = f'{source_filename}_ascii.txt'
     with open(result_filename, 'w') as f:
@@ -138,6 +206,7 @@ def save_result(ascii_art: str, original_image_path: str) -> None:
 
 
 def parse_cmd_args() -> Dict[str, Any]:
+    """Возвращает словарь с введенными при запуске параметрами"""    
     parser = ArgumentParser(description=HELP_MESSAGE, formatter_class=RawTextHelpFormatter)
     parser.add_argument('--width', type=int, default=0, help=WIDTH_HELP_MESSAGE)
     parser.add_argument('--height', type=int, default=0, help=HEIGHT_HELP_MESSAGE)
@@ -150,14 +219,14 @@ def parse_cmd_args() -> Dict[str, Any]:
 def main():
     args: Dict[str, Any] = parse_cmd_args()
     print_line()
-    print(NAME)
+    print(TITLE)
 
     path: str = try_get_path(args['path'])
-    image: PIL.Image.Image = try_get_image(path)
-    resized_image: PIL.Image.Image = try_resize_image(image, args['width'], args['height'])
-    inversion_mode: bool = try_get_mode(args['mode'])
+    image: PIL.Image = try_get_image(path)
+    resized_image = try_resize_image(image, args['width'], args['height'])
+    inversion_mode = try_get_mode(args['mode'])
     
-    ascii_art: str = convert_to_ascii(resized_image, inversion_mode)
+    ascii_art = convert_to_ascii(resized_image, inversion_mode)
     save_result(ascii_art, path)
     visualize(ascii_art, inversion_mode, args['font'])
 

@@ -2,6 +2,7 @@
 import os
 import sys
 import PIL.Image
+from PIL import ImageDraw, ImageFont
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import Dict, Any
 from tkinter import Tk, Label
@@ -9,7 +10,7 @@ from tkinter import Tk, Label
 TITLE = 'ASCII Art Converter by Aleksey Sakevich'
 ASCII_CHARS = ['¶', '@', '#', 'S', '%', '?', '*', '+', ';', ':', ',', '.', '`']
 
-HELP_MESSAGE = ('ASCII Art Converter by Aleksey Sakevich\n\n'
+HELP_MESSAGE = (f'{TITLE}\n\n'
                 'Консольное приложение, преобразующее изображение в ASCII Art\n'
                 'Поддерживаемые форматы - .PNG, .JPEG, .PPM, .GIF, .TIFF, .BMP\n'
                 'Результаты работы сохраняются в папке с этой программой\n\n'
@@ -37,6 +38,7 @@ HEIGHT_INPUT_MESSAGE = 'Введите высоту ASCII_Art в символа�
 MODE_INPUT_MESSAGE = ('Режимы преобразования:\n'
                       '1 - классический (рекомендуется для просмотра на светлом фоне)\n'
                       '2 - инверсия (рекомендуется для просмотра на темном фоне)\n'
+                      '3 - цветной (ANSI Art)\n'
                       'Выберите режим: ')
 
 INPUT_ERROR_MESSAGE = 'Некорректный ввод'
@@ -46,26 +48,28 @@ INCORRECT_FORMAT_ERROR_MESSAGE = 'Некорретный формат файла
 DEFAULT_VISUALIZER_FOREGROUND = 'black'
 DEFAULT_VISUALIZER_BACKGROUND = 'white'
 SYMBOL_RATIO = 2
+FONT_FOR_ANSI = ImageFont.load_default(10)
+SYMBOL_WIDTH, SYMBOL_HEIGHT = 11, 17
 
 
 def print_line():
     print('-' * 100)
     
     
-def convert_to_ascii(image: PIL.Image, inversion_mode: bool) -> str:
+def convert_to_ascii(image: PIL.Image, mode: int) -> str:
     """
     Конвертирует изображение в ASCII Art
 
     Параметры:
         image (PIL.Image): исходное изображение
-        inversion_mode (bool): режим работы (False - обычный, True - инверсия)
+        inversion_mode (int): режим работы
 
     Возвращаемое значение:
         str: ASCII Art
     """    
     chars = ASCII_CHARS
     width = image.size[0]
-    if inversion_mode:
+    if mode == 2:
         chars = list(reversed(ASCII_CHARS))
     grayscale_image = image.convert('L')
     pixels = grayscale_image.getdata()
@@ -148,7 +152,7 @@ def try_get_image(path: str) -> PIL.Image:
         sys.exit(INCORRECT_FORMAT_ERROR_MESSAGE)
 
 
-def try_get_mode(mode_from_args: str) -> bool:
+def try_get_mode(mode_from_args: str) -> int:
     """
     Просит пользователя ввести режим работы, если при запуске в терминале ничего не было указано.
     Если введен некорректный режим, завершает программу
@@ -157,7 +161,7 @@ def try_get_mode(mode_from_args: str) -> bool:
         mode_from_args (str): режим работы, введенный при запуске в консоли
 
     Возвращаемое значение:
-        bool: режим работы (False - обычный, True - инверсия)
+        int: режим работы 
     """    
     if mode_from_args == '':
         print_line()
@@ -165,13 +169,13 @@ def try_get_mode(mode_from_args: str) -> bool:
     else:
         mode_input = mode_from_args
 
-    if mode_input in ['1', '2']:
-        return mode_input == '2'
+    if mode_input in ['1', '2', '3']:
+        return int(mode_input)
     else:
         sys.exit(INPUT_ERROR_MESSAGE)
 
 
-def visualize(content: str, inversion_mode: bool, font: str) -> None:
+def visualize(content: str, mode: int, font: str) -> None:
     """
     Визуализирует ASCII Art в оконном приложении
 
@@ -182,7 +186,7 @@ def visualize(content: str, inversion_mode: bool, font: str) -> None:
     """    
     foreground = DEFAULT_VISUALIZER_FOREGROUND
     background = DEFAULT_VISUALIZER_BACKGROUND
-    if inversion_mode:
+    if mode == 2:
         foreground, background = background, foreground
     window = Tk()
     window.title(TITLE)
@@ -216,19 +220,54 @@ def parse_cmd_args() -> Dict[str, Any]:
     return vars(parser.parse_args())
 
 
+def draw_ansi_art(image):
+  ascii_chars = "@%#*+=-:. "
+  ascii_image= ""
+
+  for y in range(image.height):
+    for x in range(image.width):
+      r, g, b = image.getpixel((x, y))
+      intensity = (r + g + b) / 3 
+      ascii_char = ascii_chars[int(intensity / 255 * (len(ascii_chars) - 1))]
+      ascii_image += f"\033[;38;2;{r};{g};{b}m{ascii_char}\033[0m"
+    ascii_image += "\n"
+
+  print(ascii_image)
+     
+def create_ascii_image(image, symbols=ASCII_CHARS):
+    pixels = image.load()
+    symbols = list(symbols[::-1])
+    interval = len(symbols[::-1]) / 256
+    ascii_image =  PIL.Image.new(mode='RGB',
+                            size=(image.width * SYMBOL_WIDTH,
+                                  image.height * SYMBOL_HEIGHT),
+                            color=(30, 30, 30))  
+    draw = ImageDraw.Draw(ascii_image)
+    for i in range(image.height):
+        for j in range(image.width):
+            r, g, b = pixels[j, i]
+            shade_of_gray = int(r / 3 + g / 3 + b / 3)
+            draw.text((j * SYMBOL_WIDTH, i * SYMBOL_HEIGHT),
+                      (symbols[int(shade_of_gray * interval)]),
+                      font=FONT_FOR_ANSI, fill=(r, g, b))
+    ascii_image.save("ascii_photo.png")        
+    return ascii_image
+    
 def main():
     args: Dict[str, Any] = parse_cmd_args()
     print_line()
     print(TITLE)
 
-    path: str = try_get_path(args['path'])
-    image: PIL.Image = try_get_image(path)
+    path = try_get_path(args['path'])
+    image = try_get_image(path)
     resized_image = try_resize_image(image, args['width'], args['height'])
-    inversion_mode = try_get_mode(args['mode'])
-    
-    ascii_art = convert_to_ascii(resized_image, inversion_mode)
+    mode = try_get_mode(args['mode'])
+    if mode == 3:
+        create_ascii_image(resized_image)
+        sys.exit(0)
+    ascii_art = convert_to_ascii(resized_image, mode)
     save_result(ascii_art, path)
-    visualize(ascii_art, inversion_mode, args['font'])
+    visualize(ascii_art, mode, args['font'])
 
 
 if __name__ == '__main__':

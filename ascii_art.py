@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import time
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import Dict, Any
@@ -56,6 +57,16 @@ SYMBOL_RATIO = SYMBOL_HEIGHT // SYMBOL_WIDTH
 
 def print_line():
     print('-' * 100)
+
+
+def print_ansi_progress_bar(iteration, total):
+    length = 50
+    percent = ("{0:." + '1' + "f}").format(100 * (iteration / float(total)))
+    filled_length = int(length * iteration // total)
+    bar = '█' * filled_length + '-' * (length - filled_length)
+    print(f'\r{"Конвертируем в ANSI: "} |{bar}| {percent}%', end='\r')
+    if iteration == total:
+        print()
 
 
 def resize_image(image: Image, new_width: int, new_height: int) -> Image:
@@ -141,7 +152,12 @@ def get_ansi_art(image) -> Image:
     draw = ImageDraw.Draw(ascii_image)
     pixels = image.load()
 
+    print_line()
+    iterations_count = image.height
+    iteration = 0
     for i in range(image.height):
+        print_ansi_progress_bar(iteration, iterations_count)
+        iteration += 1
         for j in range(image.width):
             r, g, b = pixels[j, i]
             shade_of_gray = (r + g + b) // 3

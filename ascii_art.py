@@ -40,6 +40,7 @@ MODE_INPUT_MESSAGE = ('Режимы преобразования:\n'
                       '3 - цветной (ANSI Art)\n'
                       'Выберите режим: ')
 
+SAVE_SUCCESS_MESSAGE = 'Изображение сохранено по адресу'
 INPUT_ERROR_MESSAGE = 'Некорректный ввод'
 FILE_NOT_FOUND_ERROR_MESSAGE = 'Не удалось найти файл, возможно указан некорректный путь'
 INCORRECT_FORMAT_ERROR_MESSAGE = 'Некорретный формат файла'
@@ -48,9 +49,9 @@ DEFAULT_VISUALIZER_FOREGROUND = 'black'
 DEFAULT_VISUALIZER_BACKGROUND = 'white'
 INVERSION_MODE = 2
 COLOR_MODE = 3
-SYMBOL_RATIO = 2
-SYMBOL_WIDTH = 11
-SYMBOL_HEIGHT = 17
+SYMBOL_WIDTH = 10
+SYMBOL_HEIGHT = 20
+SYMBOL_RATIO = SYMBOL_HEIGHT // SYMBOL_WIDTH
 
 
 def print_line():
@@ -131,11 +132,11 @@ def get_ansi_art(image) -> Image:
     Возвращаемое значение:
         PIL.Image: ANSI Art
     """
-    symbols = list(ASCII_CHARS[::-1])
-    interval = len(ASCII_CHARS[::-1]) / 256
+    chars = list(reversed(ASCII_CHARS))
+    interval = len(ASCII_CHARS) / 256
     ascii_image = Image.new(mode='RGB',
                             size=(image.width * SYMBOL_WIDTH, image.height * SYMBOL_HEIGHT),
-                            color=(20, 20, 20))
+                            color=(35, 35, 35))
 
     draw = ImageDraw.Draw(ascii_image)
     pixels = image.load()
@@ -145,7 +146,7 @@ def get_ansi_art(image) -> Image:
             r, g, b = pixels[j, i]
             shade_of_gray = (r + g + b) // 3
             draw.text((j * SYMBOL_WIDTH, i * SYMBOL_HEIGHT),
-                      (symbols[int(shade_of_gray * interval)]),
+                      (chars[int(shade_of_gray * interval)]),
                       font=ImageFont.load_default(), fill=(r, g, b))
 
     return ascii_image
@@ -213,7 +214,7 @@ def visualize_ascii(content: str, mode: int) -> None:
 
     Параметры:
         content (str): ASCII Art
-        inversion_mode (bool): режим работы (False - обычный, True - инверсия)
+        mode (int): режим работы
     """
     foreground = DEFAULT_VISUALIZER_FOREGROUND
     background = DEFAULT_VISUALIZER_BACKGROUND
@@ -223,6 +224,10 @@ def visualize_ascii(content: str, mode: int) -> None:
     window.title(TITLE)
     Label(window, text=content, anchor='w', font='courier 4', bg=background, fg=foreground).pack()
     window.mainloop()
+
+
+def print_save_message(result_filename: str) -> None:
+    print(f'{SAVE_SUCCESS_MESSAGE} {os.path.abspath(result_filename)}')
 
 
 def save_ascii(ascii_art: str, original_image_path: str) -> None:
@@ -236,7 +241,7 @@ def save_ascii(ascii_art: str, original_image_path: str) -> None:
     result_filename = f'{get_source_filename_without_extension(original_image_path)}_ascii.txt'
     with open(result_filename, 'w') as f:
         f.write(ascii_art)
-    print(f'Изображение сохранено по адресу {os.path.abspath(result_filename)}')
+    print_save_message(result_filename)
 
 
 def save_ansi(ansi_art: Image, original_image_path: str) -> None:
@@ -247,8 +252,9 @@ def save_ansi(ansi_art: Image, original_image_path: str) -> None:
             ansi_art (PIL.Image): ANSI Art
             original_image_path (str): путь до исходного изображения (для получения названия файла)
     """
-    ansi_art_filename = f'{get_source_filename_without_extension(original_image_path)}_ansi.png'
-    ansi_art.save(ansi_art_filename)
+    result_filename = f'{get_source_filename_without_extension(original_image_path)}_ansi.png'
+    ansi_art.save(result_filename)
+    print_save_message(result_filename)
 
 
 def get_source_filename_without_extension(original_image_path: str) -> str:

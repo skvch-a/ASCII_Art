@@ -58,7 +58,7 @@ def print_line():
     print('-' * 100)
 
 
-def convert_to_ascii(image: PIL.Image, mode: int) -> str:
+def get_ascii_art(image: PIL.Image, mode: int) -> str:
     """
     Конвертирует изображение в ASCII Art
 
@@ -263,11 +263,10 @@ def main():
 
     if mode == COLOR_MODE:
         ansi_art = get_ansi_art(resized_image)
-        ansi_art_filename = f'{get_source_filename_without_extension(path)}_ansi.png'
-        ansi_art.save(ansi_art_filename)
+        save_ansi(ansi_art, path)
         ansi_art.show()
     else:
-        ascii_art = convert_to_ascii(resized_image, mode)
+        ascii_art = get_ascii_art(resized_image, mode)
         save_ascii(ascii_art, path)
         visualize_ascii(ascii_art, mode, args['font'])
 

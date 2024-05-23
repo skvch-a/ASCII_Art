@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
-import PIL.Image
-from PIL import ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import Dict, Any
 from tkinter import Tk, Label
@@ -58,13 +57,54 @@ def print_line():
     print('-' * 100)
 
 
-def get_ascii_art(image: PIL.Image, mode: int) -> str:
+def resize_image(image: Image, new_width: int, new_height: int) -> Image:
+    """
+    Изменяет размер изображения по введенным параметрам.
+    Если new_height == 0, расчитывает высоту автоматически, сохраняя соотношение сторон для ASCII Art
+
+    Возвращаемое значение:
+        PIL.Image: изображение с измененным размером
+    """
+    width, height = image.size
+    if new_height == 0:
+        ratio = height / width / SYMBOL_RATIO
+        new_height = int(new_width * ratio)
+    resized_image = image.resize((new_width, new_height))
+    return resized_image
+
+
+def try_resize_image(image: Image, width_from_args: int, height_from_args: int) -> Image:
+    """
+    Изменяет размер изображения по введенным параметрам, если они корректны, иначе завершает программу.
+    Если параметры не передавались в терминале при запуске, просит пользователя их ввести.
+
+    Параметры:
+        image (PIL.Image): исходное изображение
+        width_from_args (int): ширина для ASCII Art, введенная при запуске в консоли
+        height_from_args (int): высота для ASCII Art, введенная при запуске в консоли
+
+    Возвращаемое значение:
+        PIL.Image: изображение с измененным размером
+    """
+    try:
+        if width_from_args == 0:
+            print_line()
+            art_width = int(input(WIDTH_INPUT_MESSAGE))
+            art_height = int(input(HEIGHT_INPUT_MESSAGE))
+        else:
+            art_width, art_height = width_from_args, height_from_args
+        return resize_image(image, art_width, art_height)
+    except ValueError:
+        sys.exit(INPUT_ERROR_MESSAGE)
+
+
+def get_ascii_art(image: Image, mode: int) -> str:
     """
     Конвертирует изображение в ASCII Art
 
     Параметры:
         image (PIL.Image): исходное изображение
-        inversion_mode (int): режим работы
+        mode (int): режим работы
 
     Возвращаемое значение:
         str: ASCII Art
@@ -80,45 +120,35 @@ def get_ascii_art(image: PIL.Image, mode: int) -> str:
     return result
 
 
-def resize_image(image: PIL.Image, new_width: int, new_height: int) -> PIL.Image:
+def get_ansi_art(image) -> Image:
     """
-    Изменяет размер изображения по введенным параметрам. 
-    Если new_height == 0, расчитывает высоту автоматически, сохраняя соотношение сторон для ASCII Art
-        
-    Возвращаемое значение:
-        PIL.Image: изображение с измененным размером
-    """
-    width, height = image.size
-    if new_height == 0:
-        ratio = height / width / SYMBOL_RATIO
-        new_height = int(new_width * ratio)
-    resized_image = image.resize((new_width, new_height))
-    return resized_image
-
-
-def try_resize_image(image: PIL.Image, width_from_args: int, height_from_args: int) -> PIL.Image:
-    """
-    Изменяет размер изображения по введенным параметрам, если они корректны, иначе завершает программу.
-    Если параметры не передавались в терминале при запуске, просит пользователя их ввести.
+    Конвертирует изображение в ANSI Art
 
     Параметры:
         image (PIL.Image): исходное изображение
-        width_from_args (int): ширина для ASCII Art, введенная при запуске в консоли
-        height_from_args (int): высота для ASCII Art, введенная при запуске в консоли
-        
+        mode (int): режим работы
+
     Возвращаемое значение:
-        PIL.Image: изображение с измененным размером
+        PIL.Image: ANSI Art
     """
-    try:
-        if width_from_args == 0:
-            print_line()
-            art_width = int(input(WIDTH_INPUT_MESSAGE))
-            art_height = int(input(HEIGHT_INPUT_MESSAGE))
-        else:
-            art_width, art_height = width_from_args, height_from_args
-        return resize_image(image, art_width, art_height)
-    except ValueError:
-        sys.exit(INPUT_ERROR_MESSAGE)
+    symbols = list(ASCII_CHARS[::-1])
+    interval = len(ASCII_CHARS[::-1]) / 256
+    ascii_image = Image.new(mode='RGB',
+                            size=(image.width * SYMBOL_WIDTH, image.height * SYMBOL_HEIGHT),
+                            color=(20, 20, 20))
+
+    draw = ImageDraw.Draw(ascii_image)
+    pixels = image.load()
+
+    for i in range(image.height):
+        for j in range(image.width):
+            r, g, b = pixels[j, i]
+            shade_of_gray = (r + g + b) // 3
+            draw.text((j * SYMBOL_WIDTH, i * SYMBOL_HEIGHT),
+                      (symbols[int(shade_of_gray * interval)]),
+                      font=ImageFont.load_default(), fill=(r, g, b))
+
+    return ascii_image
 
 
 def try_get_path(path_from_args: str) -> str:
@@ -139,7 +169,7 @@ def try_get_path(path_from_args: str) -> str:
     return path
 
 
-def try_get_image(path: str) -> PIL.Image:
+def try_get_image(path: str) -> Image:
     """
     Возвращает изображение по введенному пути, если он корректен, иначе завершает программу
 
@@ -147,10 +177,10 @@ def try_get_image(path: str) -> PIL.Image:
         path (str): путь до изображения
     """
     try:
-        return PIL.Image.open(path)
+        return Image.open(path)
     except (FileNotFoundError, IsADirectoryError):
         sys.exit(FILE_NOT_FOUND_ERROR_MESSAGE)
-    except PIL.UnidentifiedImageError:
+    except UnidentifiedImageError:
         sys.exit(INCORRECT_FORMAT_ERROR_MESSAGE)
 
 
@@ -177,14 +207,13 @@ def try_get_mode(mode_from_args: str) -> int:
         sys.exit(INPUT_ERROR_MESSAGE)
 
 
-def visualize_ascii(content: str, mode: int, font: str) -> None:
+def visualize_ascii(content: str, mode: int) -> None:
     """
     Визуализирует ASCII Art в оконном приложении
 
     Параметры:
         content (str): ASCII Art
         inversion_mode (bool): режим работы (False - обычный, True - инверсия)
-        font (str): шрифт для визуализации
     """
     foreground = DEFAULT_VISUALIZER_FOREGROUND
     background = DEFAULT_VISUALIZER_BACKGROUND
@@ -192,12 +221,8 @@ def visualize_ascii(content: str, mode: int, font: str) -> None:
         foreground, background = background, foreground
     window = Tk()
     window.title(TITLE)
-    Label(window, text=content, anchor='w', font=font, bg=background, fg=foreground).pack()
+    Label(window, text=content, anchor='w', font='courier 4', bg=background, fg=foreground).pack()
     window.mainloop()
-
-
-def get_source_filename_without_extension(original_image_path: str) -> str:
-    return os.path.basename(original_image_path).split('.')[0]
 
 
 def save_ascii(ascii_art: str, original_image_path: str) -> None:
@@ -214,9 +239,20 @@ def save_ascii(ascii_art: str, original_image_path: str) -> None:
     print(f'Изображение сохранено по адресу {os.path.abspath(result_filename)}')
 
 
-def save_ansi(ansi_art: PIL.Image, original_image_path: str) -> None:
+def save_ansi(ansi_art: Image, original_image_path: str) -> None:
+    """
+        Сохраняет ANSI Art в папку со скриптом
+
+        Параметры:
+            ansi_art (PIL.Image): ANSI Art
+            original_image_path (str): путь до исходного изображения (для получения названия файла)
+    """
     ansi_art_filename = f'{get_source_filename_without_extension(original_image_path)}_ansi.png'
     ansi_art.save(ansi_art_filename)
+
+
+def get_source_filename_without_extension(original_image_path: str) -> str:
+    return os.path.basename(original_image_path).split('.')[0]
 
 
 def parse_cmd_args() -> Dict[str, Any]:
@@ -226,29 +262,7 @@ def parse_cmd_args() -> Dict[str, Any]:
     parser.add_argument('--height', type=int, default=0, help=HEIGHT_HELP_MESSAGE)
     parser.add_argument('--mode', type=str, default='', help=MODE_HELP_MESSAGE)
     parser.add_argument('--path', type=str, default='', help=PATH_HELP_MESSAGE)
-    parser.add_argument('--font', type=str, default='courier 4', help=FONT_HELP_MESSAGE)
     return vars(parser.parse_args())
-
-
-def get_ansi_art(image):
-    symbols = list(ASCII_CHARS[::-1])
-    interval = len(ASCII_CHARS[::-1]) / 256
-    ascii_image = PIL.Image.new(mode='RGB',
-                                size=(image.width * SYMBOL_WIDTH, image.height * SYMBOL_HEIGHT),
-                                color=(40, 40, 40))
-
-    draw = ImageDraw.Draw(ascii_image)
-    pixels = image.load()
-
-    for i in range(image.height):
-        for j in range(image.width):
-            r, g, b = pixels[j, i]
-            shade_of_gray = (r + g + b) // 3
-            draw.text((j * SYMBOL_WIDTH, i * SYMBOL_HEIGHT),
-                      (symbols[int(shade_of_gray * interval)]),
-                      font=ImageFont.load_default(), fill=(r, g, b))
-
-    return ascii_image
 
 
 def main():
@@ -268,7 +282,7 @@ def main():
     else:
         ascii_art = get_ascii_art(resized_image, mode)
         save_ascii(ascii_art, path)
-        visualize_ascii(ascii_art, mode, args['font'])
+        visualize_ascii(ascii_art, mode)
 
 
 if __name__ == '__main__':

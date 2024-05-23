@@ -22,13 +22,13 @@ def test_resize_image():
 
 def test_classic_mode():
     image = PIL.Image.new('RGB', (2, 2))
-    ascii_art = art.convert_to_ascii(image, False)
+    ascii_art = art.get_ascii_art(image, 1)
     assert ascii_art == "¶¶\n¶¶"
 
 
 def test_inversion_mode():
     image = PIL.Image.new('RGB', (2, 2))
-    ascii_art = art.convert_to_ascii(image, True)
+    ascii_art = art.get_ascii_art(image, 2)
     assert ascii_art == "``\n``"
 
 

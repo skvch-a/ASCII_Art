@@ -200,7 +200,7 @@ def get_source_filename_without_extension(original_image_path: str) -> str:
     return os.path.basename(original_image_path).split('.')[0]
 
 
-def save_result(ascii_art: str, original_image_path: str) -> None:
+def save_ascii(ascii_art: str, original_image_path: str) -> None:
     """
     Сохраняет ASCII Art в папку со скриптом
 
@@ -208,11 +208,15 @@ def save_result(ascii_art: str, original_image_path: str) -> None:
         ascii_art (str): ASCII Art
         original_image_path (str): путь до исходного изображения (для получения названия файла)
     """
-    source_filename_no_ex = get_source_filename_without_extension(original_image_path)
-    result_filename = f'{source_filename_no_ex}_ascii.txt'
+    result_filename = f'{get_source_filename_without_extension(original_image_path)}_ascii.txt'
     with open(result_filename, 'w') as f:
         f.write(ascii_art)
     print(f'Изображение сохранено по адресу {os.path.abspath(result_filename)}')
+
+
+def save_ansi(ansi_art: PIL.Image, original_image_path: str) -> None:
+    ansi_art_filename = f'{get_source_filename_without_extension(original_image_path)}_ansi.png'
+    ansi_art.save(ansi_art_filename)
 
 
 def parse_cmd_args() -> Dict[str, Any]:
@@ -259,15 +263,13 @@ def main():
 
     if mode == COLOR_MODE:
         ansi_art = get_ansi_art(resized_image)
-        source_filename_no_ex = get_source_filename_without_extension(path)
-        ansi_art_filename = f'{source_filename_no_ex}_ansi.png'
+        ansi_art_filename = f'{get_source_filename_without_extension(path)}_ansi.png'
         ansi_art.save(ansi_art_filename)
         ansi_art.show()
-        sys.exit()
-
-    ascii_art = convert_to_ascii(resized_image, mode)
-    save_result(ascii_art, path)
-    visualize_ascii(ascii_art, mode, args['font'])
+    else:
+        ascii_art = convert_to_ascii(resized_image, mode)
+        save_ascii(ascii_art, path)
+        visualize_ascii(ascii_art, mode, args['font'])
 
 
 if __name__ == '__main__':

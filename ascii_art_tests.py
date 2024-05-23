@@ -33,5 +33,5 @@ def test_inversion_mode():
 
 
 def test_save_result():
-    art.save_result('###', 'test_save_result.txt')
+    art.save_ascii('###', 'test_save_result.txt')
     assert os.path.exists('test_save_result_ascii.txt')

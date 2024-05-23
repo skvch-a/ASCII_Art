@@ -227,6 +227,7 @@ def visualize_ascii(content: str, mode: int) -> None:
 
 
 def print_save_message(result_filename: str) -> None:
+    print_line()
     print(f'{SAVE_SUCCESS_MESSAGE} {os.path.abspath(result_filename)}')
 
 

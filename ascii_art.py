@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import sys
-import time
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import Dict, Any
@@ -22,19 +21,16 @@ HELP_MESSAGE = (f'{TITLE}\n\n'
                 'тогда программа попросит ввести оставшиеся данные в консольном приложении.\n'
                 'Но если передать --width и не передавать --height, программа подберет высоту автоматически.\n'
                 'Если не передавать --width, программа попросит ввести размеры в приложении,'
-                'вне зависимости от наличия флага --height.\n\n'
-                'По умолчанию стоит шрифт "courier 4" и менять его не рекомендуется\n'
-                'Если вы все-таки решили поменять шрифт, убедитесь что он моноширинный и его размер не меньше 2\n')
+                'вне зависимости от наличия флага --height.\n')
 
 WIDTH_HELP_MESSAGE = 'Ширина ASCII Art в символах'
 HEIGHT_HELP_MESSAGE = 'Высота ASCII Art в символах'
-MODE_HELP_MESSAGE = 'Режим работы (1 - обычный, 2 - инверсия)'
+MODE_HELP_MESSAGE = 'Режим работы (1 - обычный, 2 - инверсия, 3 - цветной)'
 PATH_HELP_MESSAGE = 'Путь до изображения'
-FONT_HELP_MESSAGE = 'Шрифт для визуализации, по умолчанию стоит courier размера 4 (менять не рекомендуется)'
 
 PATH_INPUT_MESSAGE = 'Введите путь до изображения: '
-WIDTH_INPUT_MESSAGE = 'Введите ширину ASCII_Art в символах (рекомендуется 100 - 500): '
-HEIGHT_INPUT_MESSAGE = 'Введите высоту ASCII_Art в символах (для автоподбора высоты введите 0): '
+WIDTH_INPUT_MESSAGE = 'Введите ширину ASCII Art в символах (рекомендуется 100 - 500): '
+HEIGHT_INPUT_MESSAGE = 'Введите высоту ASCII Art в символах (для автоподбора высоты введите 0): '
 MODE_INPUT_MESSAGE = ('Режимы преобразования:\n'
                       '1 - классический (рекомендуется для просмотра на светлом фоне)\n'
                       '2 - инверсия (рекомендуется для просмотра на темном фоне)\n'
@@ -45,6 +41,9 @@ SAVE_SUCCESS_MESSAGE = 'Изображение сохранено по адре�
 INPUT_ERROR_MESSAGE = 'Некорректный ввод'
 FILE_NOT_FOUND_ERROR_MESSAGE = 'Не удалось найти файл, возможно указан некорректный путь'
 INCORRECT_FORMAT_ERROR_MESSAGE = 'Некорретный формат файла'
+
+PROGRESS_BAR_PREFIX = "Конвертируем в ANSI: "
+PROGRESS_BAR_LENGTH = 50
 
 DEFAULT_VISUALIZER_FOREGROUND = 'black'
 DEFAULT_VISUALIZER_BACKGROUND = 'white'
@@ -60,13 +59,10 @@ def print_line():
 
 
 def print_ansi_progress_bar(iteration, total):
-    length = 50
     percent = ("{0:." + '1' + "f}").format(100 * (iteration / float(total)))
-    filled_length = int(length * iteration // total)
-    bar = '█' * filled_length + '-' * (length - filled_length)
-    print(f'\r{"Конвертируем в ANSI: "} |{bar}| {percent}%', end='\r')
-    if iteration == total:
-        print()
+    filled_length = int(PROGRESS_BAR_LENGTH * iteration // total)
+    bar = '█' * filled_length + '-' * (PROGRESS_BAR_LENGTH - filled_length)
+    print(f'\r{PROGRESS_BAR_PREFIX} |{bar}| {percent}%', end='\r')
 
 
 def resize_image(image: Image, new_width: int, new_height: int) -> Image:
@@ -147,7 +143,7 @@ def get_ansi_art(image) -> Image:
     interval = len(ASCII_CHARS) / 256
     ascii_image = Image.new(mode='RGB',
                             size=(image.width * SYMBOL_WIDTH, image.height * SYMBOL_HEIGHT),
-                            color=(35, 35, 35))
+                            color=(40, 40, 40))
 
     draw = ImageDraw.Draw(ascii_image)
     pixels = image.load()

@@ -177,6 +177,10 @@ def try_get_path(path_from_args: str) -> str:
     if path_from_args == '':
         print_line()
         path = input(PATH_INPUT_MESSAGE)
+        # в Windows, если скоприровать 'как путь', то он возьмет путь в кавычки
+        # чтобы избежать связанных с этим ошибок, следующий код убирает кавычки, если они есть
+        if path[0] == '"':
+            path = path[1:-1]
     else:
         path = path_from_args
     return path

@@ -155,6 +155,8 @@ def get_ansi_art(image) -> Image:
         print_ansi_progress_bar(iteration, iterations_count)
         iteration += 1
         for j in range(image.width):
+            if len(pixels[j, i]) != 3:
+                sys.exit(INCORRECT_FORMAT_ERROR_MESSAGE)
             r, g, b = pixels[j, i]
             shade_of_gray = (r + g + b) // 3
             draw.text((j * SYMBOL_WIDTH, i * SYMBOL_HEIGHT),
@@ -177,7 +179,7 @@ def try_get_path(path_from_args: str) -> str:
     if path_from_args == '':
         print_line()
         path = input(PATH_INPUT_MESSAGE)
-        # в Windows, если скоприровать 'как путь', то он возьмет путь в кавычки
+        # в Windows, если скоприровать файл 'как путь', то путь будет скопирован в кавычках
         # чтобы избежать связанных с этим ошибок, следующий код убирает кавычки, если они есть
         if path[0] == '"':
             path = path[1:-1]
@@ -234,7 +236,7 @@ def visualize_ascii(content: str, mode: int) -> None:
     """
     foreground = DEFAULT_VISUALIZER_FOREGROUND
     background = DEFAULT_VISUALIZER_BACKGROUND
-    if mode == 2:
+    if mode == INVERSION_MODE:
         foreground, background = background, foreground
     window = Tk()
     window.title(TITLE)

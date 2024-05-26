@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+from warnings import filterwarnings
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import Dict, Any
@@ -202,7 +203,7 @@ def try_get_image(path: str) -> Image:
         path (str): путь до изображения
     """
     try:
-        return Image.open(path)
+        return Image.open(path).convert('RGB')
     except (FileNotFoundError, IsADirectoryError):
         sys.exit(FILE_NOT_FOUND_ERROR_MESSAGE)
     except UnidentifiedImageError:
@@ -298,6 +299,7 @@ def parse_cmd_args() -> Dict[str, Any]:
 
 def main():
     args = parse_cmd_args()
+    filterwarnings('ignore')
     print_line()
     print(TITLE)
 

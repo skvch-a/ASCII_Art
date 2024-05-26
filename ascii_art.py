@@ -9,9 +9,15 @@ from tkinter import Tk, Label
 TITLE = 'ASCII Art Converter by Aleksey Sakevich'
 ASCII_CHARS = ['¶', '@', '#', 'S', '%', '?', '*', '+', ';', ':', ',', '.', '`']
 
-HELP_MESSAGE = (f'{TITLE}\n\n'
-                'Консольное приложение, преобразующее изображение в ASCII Art\n'
-                'Поддерживаемые форматы - .PNG, .JPEG, .PPM, .GIF, .TIFF, .BMP\n'
+HELP_MESSAGE = (f'{TITLE}\n'
+                'Консольное приложение, преобразующее изображение в ASCII Art\n\n'
+                'Режимы работы:\n'
+                '1 - классический\n'
+                '2 - инверсия\n'
+                '3 - цветной\n'
+                'Поддерживаемые форматы:\n'
+                '1 и 2 режим - .PNG, .JPEG, .PPM, .GIF, .TIFF, .BMP\n'
+                '3 режим - .JPEG\n'
                 'Результаты работы сохраняются в папке с этой программой\n\n'
                 'Пример запуска: ./ascii_art.py\n'
                 'Есть возможность передачи параметров сразу через командную строку\n'
@@ -291,10 +297,10 @@ def parse_cmd_args() -> Dict[str, Any]:
 
 
 def main():
+    args = parse_cmd_args()
     print_line()
     print(TITLE)
 
-    args = parse_cmd_args()
     path = try_get_path(args['path'])
     image = try_get_image(path)
     resized_image = try_resize_image(image, args['width'], args['height'])

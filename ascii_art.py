@@ -65,9 +65,9 @@ def print_line():
     print('-' * 100)
 
 
-def print_ansi_progress_bar(iteration, total):
-    percent = ("{0:." + '1' + "f}").format(100 * (iteration / float(total)))
-    filled_length = int(PROGRESS_BAR_LENGTH * iteration // total)
+def print_ansi_progress_bar(iteration: int, total: int) -> None:
+    percent = ("{0:." + '1' + "f}").format(100 * (iteration / total))
+    filled_length = PROGRESS_BAR_LENGTH * iteration // total
     bar = '█' * filled_length + '-' * (PROGRESS_BAR_LENGTH - filled_length)
     print(f'\r{PROGRESS_BAR_PREFIX} |{bar}| {percent}%', end='\r')
 
@@ -156,14 +156,10 @@ def get_ansi_art(image) -> Image:
     pixels = image.load()
 
     print_line()
-    iterations_count = image.height
-    iteration = 0
+    iterations_count = image.height - 1
     for i in range(image.height):
-        print_ansi_progress_bar(iteration, iterations_count)
-        iteration += 1
+        print_ansi_progress_bar(i, iterations_count)
         for j in range(image.width):
-            if len(pixels[j, i]) != 3:
-                sys.exit(INCORRECT_FORMAT_ERROR_MESSAGE)
             r, g, b = pixels[j, i]
             shade_of_gray = (r + g + b) // 3
             draw.text((j * SYMBOL_WIDTH, i * SYMBOL_HEIGHT),

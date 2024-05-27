@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os
+from os.path import abspath, basename
 from warnings import filterwarnings
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -251,7 +251,7 @@ def visualize_ascii(content: str, mode: int) -> None:
 
 
 def print_save_message(result_filename: str) -> None:
-    print(f'{SAVE_SUCCESS_MESSAGE} {os.path.abspath(result_filename)}')
+    print(f'{SAVE_SUCCESS_MESSAGE} {abspath(result_filename)}')
 
 
 def save_ascii(ascii_art: str, original_image_path: str) -> None:
@@ -283,7 +283,7 @@ def save_ansi(ansi_art: Image, original_image_path: str) -> None:
 
 
 def get_source_filename_without_extension(original_image_path: str) -> str:
-    return os.path.basename(original_image_path).split('.')[0]
+    return basename(original_image_path).split('.')[0]
 
 
 def parse_cmd_args() -> Dict[str, Any]:

@@ -153,7 +153,7 @@ def get_ansi_art(image) -> Image:
     interval = len(ASCII_CHARS) / 256
     ascii_image = Image.new(mode='RGB',
                             size=(image.width * SYMBOL_WIDTH, image.height * SYMBOL_HEIGHT),
-                            color=(40, 40, 40))
+                            color=(25, 25, 25))
 
     draw = ImageDraw.Draw(ascii_image)
     pixels = image.load()
@@ -187,7 +187,7 @@ def try_get_path(path_from_args: str) -> str:
         path = input(PATH_INPUT_MESSAGE)
         # в Windows, если скоприровать файл 'как путь', то путь будет скопирован в кавычках
         # чтобы избежать связанных с этим ошибок, следующий код убирает кавычки, если они есть
-        if path[0] == '"':
+        if path != '' and path[0] == '"':
             path = path[1:-1]
     else:
         path = path_from_args

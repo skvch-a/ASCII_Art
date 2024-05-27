@@ -10,12 +10,14 @@ from tkinter import Tk, Label
 TITLE = 'ASCII Art Converter by Aleksey Sakevich'
 ASCII_CHARS = ['¶', '@', '#', 'S', '%', '?', '*', '+', ';', ':', ',', '.', '`']
 
+MODES_MESSAGE = ('Режимы преобразования:\n'
+                 '1 - классический (рекомендуется для просмотра на светлом фоне)\n'
+                 '2 - инверсия (рекомендуется для просмотра на темном фоне)\n'
+                 '3 - цветной (ANSI Art)')
+
 HELP_MESSAGE = (f'{TITLE}\n'
                 'Консольное приложение, преобразующее изображение в ASCII Art\n\n'
-                'Режимы работы:\n'
-                '1 - классический\n'
-                '2 - инверсия\n'
-                '3 - цветной\n'
+                f'{MODES_MESSAGE}\n'
                 'Поддерживаемые форматы: .PNG, .JPEG, .PPM, .GIF, .TIFF, .BMP\n'
                 'Результаты работы сохраняются в папке с этой программой\n\n'
                 'Пример запуска: ./ascii_art.py\n'
@@ -36,10 +38,7 @@ PATH_HELP_MESSAGE = 'Путь до изображения'
 PATH_INPUT_MESSAGE = 'Введите путь до изображения: '
 WIDTH_INPUT_MESSAGE = 'Введите ширину ASCII Art в символах (рекомендуется 100 - 500): '
 HEIGHT_INPUT_MESSAGE = 'Введите высоту ASCII Art в символах (для автоподбора высоты введите 0): '
-MODE_INPUT_MESSAGE = ('Режимы преобразования:\n'
-                      '1 - классический (рекомендуется для просмотра на светлом фоне)\n'
-                      '2 - инверсия (рекомендуется для просмотра на темном фоне)\n'
-                      '3 - цветной (ANSI Art)\n'
+MODE_INPUT_MESSAGE = (f'{MODES_MESSAGE}\n'
                       'Выберите режим: ')
 
 SAVE_SUCCESS_MESSAGE = 'Изображение сохранено по адресу'
@@ -246,7 +245,6 @@ def visualize_ascii(content: str, mode: int) -> None:
 
 
 def print_save_message(result_filename: str) -> None:
-    print_line()
     print(f'{SAVE_SUCCESS_MESSAGE} {os.path.abspath(result_filename)}')
 
 
@@ -261,6 +259,7 @@ def save_ascii(ascii_art: str, original_image_path: str) -> None:
     result_filename = f'{get_source_filename_without_extension(original_image_path)}_ascii.txt'
     with open(result_filename, 'w') as f:
         f.write(ascii_art)
+    print_line()
     print_save_message(result_filename)
 
 

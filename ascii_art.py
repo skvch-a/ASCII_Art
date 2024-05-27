@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import sys
 from warnings import filterwarnings
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -62,6 +61,13 @@ def print_line():
     print('-' * 100)
 
 
+def exit_with_message(message):
+    # не использую sys.exit(message), тк он не работает в интерактивном режиме
+    print_line()
+    print(message)
+    exit()
+
+
 def print_ansi_progress_bar(iteration: int, total: int) -> None:
     percent = ("{0:." + '1' + "f}").format(100 * (iteration / total))
     filled_length = PROGRESS_BAR_LENGTH * iteration // total
@@ -107,7 +113,7 @@ def try_resize_image(image: Image, width_from_args: int, height_from_args: int) 
             art_width, art_height = width_from_args, height_from_args
         return resize_image(image, art_width, art_height)
     except ValueError:
-        sys.exit(INPUT_ERROR_MESSAGE)
+        exit_with_message(INPUT_ERROR_MESSAGE)
 
 
 def get_ascii_art(image: Image, mode: int) -> str:
@@ -198,9 +204,9 @@ def try_get_image(path: str) -> Image:
     try:
         return Image.open(path).convert('RGB')
     except (FileNotFoundError, IsADirectoryError):
-        sys.exit(FILE_NOT_FOUND_ERROR_MESSAGE)
+        exit_with_message(FILE_NOT_FOUND_ERROR_MESSAGE)
     except UnidentifiedImageError:
-        sys.exit(INCORRECT_FORMAT_ERROR_MESSAGE)
+        exit_with_message(INCORRECT_FORMAT_ERROR_MESSAGE)
 
 
 def try_get_mode(mode_from_args: str) -> int:
@@ -223,7 +229,7 @@ def try_get_mode(mode_from_args: str) -> int:
     if mode_input in ['1', '2', '3']:
         return int(mode_input)
     else:
-        sys.exit(INPUT_ERROR_MESSAGE)
+        exit_with_message(INPUT_ERROR_MESSAGE)
 
 
 def visualize_ascii(content: str, mode: int) -> None:

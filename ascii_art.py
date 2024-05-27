@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from os.path import abspath, basename
 from warnings import filterwarnings
-from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
+from PIL import Image, ImageDraw, ImageFont, ImageTk, UnidentifiedImageError
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import Dict, Any
 from tkinter import Tk, Label
@@ -250,6 +250,16 @@ def visualize_ascii(content: str, mode: int) -> None:
     window.mainloop()
 
 
+def visualize_ansi(content: Image) -> None:
+    content.show()
+    # show() может не работать на Windows, поэтому дополнительно создаю окно Tkinter
+    window = Tk()
+    window.title(TITLE)
+    img = ImageTk.PhotoImage(content)
+    Label(window, image=img).pack()
+    window.mainloop()
+
+
 def print_save_message(result_filename: str) -> None:
     print(f'{SAVE_SUCCESS_MESSAGE} {abspath(result_filename)} {" " * PROGRESS_BAR_LENGTH}')
 
@@ -310,7 +320,7 @@ def main():
     if mode == COLOR_MODE:
         ansi_art = get_ansi_art(resized_image)
         save_ansi(ansi_art, path)
-        ansi_art.show()
+        visualize_ansi(ansi_art)
     else:
         ascii_art = get_ascii_art(resized_image, mode)
         save_ascii(ascii_art, path)

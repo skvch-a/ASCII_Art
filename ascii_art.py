@@ -251,7 +251,7 @@ def visualize_ascii(content: str, mode: int) -> None:
 
 
 def print_save_message(result_filename: str) -> None:
-    print(f'{SAVE_SUCCESS_MESSAGE} {abspath(result_filename)}')
+    print(f'{SAVE_SUCCESS_MESSAGE} {abspath(result_filename)} {" " * PROGRESS_BAR_LENGTH}')
 
 
 def save_ascii(ascii_art: str, original_image_path: str) -> None:

@@ -252,7 +252,7 @@ def visualize_ascii(content: str, mode: int) -> None:
 
 def visualize_ansi(content: Image) -> None:
     content.show()
-    # show() может не работать на Windows, поэтому дополнительно создаю окно Tkinter
+    # show() может не работать на Windows, поэтому дополнительно отображаю в окне Tkinter
     window = Tk()
     window.title(TITLE)
     img = ImageTk.PhotoImage(content)

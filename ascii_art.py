@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import logging
 from os.path import abspath, basename
 from warnings import filterwarnings
 from PIL import Image, ImageDraw, ImageFont, ImageTk, UnidentifiedImageError
@@ -58,13 +59,13 @@ SYMBOL_RATIO = SYMBOL_HEIGHT // SYMBOL_WIDTH
 
 
 def print_line():
-    print('-' * 100)
+    logging.info(('-' * 100))
 
 
 def exit_with_message(message):
     # не использую sys.exit(message), тк он не работает в интерактивном режиме
     print_line()
-    print(message)
+    logging.info(message)
     exit()
 
 
@@ -261,7 +262,7 @@ def visualize_ansi(content: Image) -> None:
 
 
 def print_save_message(result_filename: str) -> None:
-    print(f'{SAVE_SUCCESS_MESSAGE} {abspath(result_filename)} {" " * PROGRESS_BAR_LENGTH}')
+    logging.info(f'{SAVE_SUCCESS_MESSAGE} {abspath(result_filename)} {" " * PROGRESS_BAR_LENGTH}')
 
 
 def save_ascii(ascii_art: str, original_image_path: str) -> None:
@@ -307,10 +308,11 @@ def parse_cmd_args() -> Dict[str, Any]:
 
 
 def main():
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
     args = parse_cmd_args()
     filterwarnings('ignore')
     print_line()
-    print(TITLE)
+    logging.info(TITLE)
 
     path = try_get_path(args['path'])
     image = try_get_image(path)

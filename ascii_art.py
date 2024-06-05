@@ -113,7 +113,7 @@ def get_ansi_art(image) -> Image:
     for i in range(image.height):
         print_ansi_progress_bar(i, iterations_count)
         for j in range(image.width):
-            draw.text((j * SYMBOL_WIDTH, i * SYMBOL_HEIGHT), '#', font=ImageFont.load_default(), fill=pixels[j, i])
+            draw.text((j * SYMBOL_WIDTH, i * SYMBOL_HEIGHT), '@', font=ImageFont.load_default(), fill=pixels[j, i])
 
     return ascii_image
 

@@ -1,61 +1,12 @@
 #!/usr/bin/env python3
 import logging
+from constants import *
+from visualizer import visualize_ascii, visualize_ansi
 from os.path import abspath, basename
 from warnings import filterwarnings
-from PIL import Image, ImageDraw, ImageFont, ImageTk, UnidentifiedImageError
+from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from argparse import ArgumentParser, RawTextHelpFormatter
 from typing import Dict, Any
-from tkinter import Tk, Label
-
-TITLE = 'ASCII Art Converter by Aleksey Sakevich'
-ASCII_CHARS = ['¶', '@', '#', 'S', '%', '?', '*', '+', ';', ':', ',', '.', '`']
-
-MODES_MESSAGE = ('Режимы преобразования:\n'
-                 '1 - классический (рекомендуется для просмотра на светлом фоне)\n'
-                 '2 - инверсия (рекомендуется для просмотра на темном фоне)\n'
-                 '3 - цветной (ANSI Art)')
-
-HELP_MESSAGE = (f'{TITLE}\n'
-                'Консольное приложение, преобразующее изображение в ASCII Art\n\n'
-                f'{MODES_MESSAGE}\n'
-                'Поддерживаемые форматы: .PNG, .JPEG, .PPM, .GIF, .TIFF, .BMP\n'
-                'Результаты работы сохраняются в папке с этой программой\n\n'
-                'Пример запуска: ./ascii_art.py\n'
-                'Есть возможность передачи параметров сразу через командную строку\n'
-                'Пример (без автоподбора высоты): ./ascii_art.py --width=200 --height=200 --mode=1 --path=/path\n'
-                'Пример (с автоподбором высоты): ./ascii_art.py --width=200 --mode=1 --path=/path\n\n'
-                'Можно передавать параметры частично (например только --path),'
-                'тогда программа попросит ввести оставшиеся данные в консольном приложении.\n'
-                'Но если передать --width и не передавать --height, программа подберет высоту автоматически.\n'
-                'Если не передавать --width, программа попросит ввести размеры в приложении,'
-                'вне зависимости от наличия флага --height.\n')
-
-WIDTH_HELP_MESSAGE = 'Ширина ASCII Art в символах'
-HEIGHT_HELP_MESSAGE = 'Высота ASCII Art в символах'
-MODE_HELP_MESSAGE = 'Режим работы (1 - обычный, 2 - инверсия, 3 - цветной)'
-PATH_HELP_MESSAGE = 'Путь до изображения'
-
-PATH_INPUT_MESSAGE = 'Введите путь до изображения: '
-WIDTH_INPUT_MESSAGE = 'Введите ширину ASCII Art в символах (рекомендуется 100 - 500): '
-HEIGHT_INPUT_MESSAGE = 'Введите высоту ASCII Art в символах (для автоподбора высоты введите 0): '
-MODE_INPUT_MESSAGE = (f'{MODES_MESSAGE}\n'
-                      'Выберите режим: ')
-
-SAVE_SUCCESS_MESSAGE = 'Изображение сохранено по адресу'
-INPUT_ERROR_MESSAGE = 'Некорректный ввод'
-FILE_NOT_FOUND_ERROR_MESSAGE = 'Не удалось найти файл, возможно указан некорректный путь'
-INCORRECT_FORMAT_ERROR_MESSAGE = 'Некорретный формат файла'
-
-PROGRESS_BAR_PREFIX = "Конвертируем в ANSI: "
-PROGRESS_BAR_LENGTH = 50
-
-DEFAULT_VISUALIZER_FOREGROUND = 'black'
-DEFAULT_VISUALIZER_BACKGROUND = 'white'
-INVERSION_MODE = 2
-COLOR_MODE = 3
-SYMBOL_WIDTH = 10
-SYMBOL_HEIGHT = 20
-SYMBOL_RATIO = SYMBOL_HEIGHT // SYMBOL_WIDTH
 
 
 def print_line():
@@ -150,8 +101,6 @@ def get_ansi_art(image) -> Image:
     Возвращаемое значение:
         PIL.Image: ANSI Art
     """
-    chars = list(reversed(ASCII_CHARS))
-    interval = len(ASCII_CHARS) / 256
     ascii_image = Image.new(mode='RGB',
                             size=(image.width * SYMBOL_WIDTH, image.height * SYMBOL_HEIGHT),
                             color=(25, 25, 25))
@@ -164,11 +113,7 @@ def get_ansi_art(image) -> Image:
     for i in range(image.height):
         print_ansi_progress_bar(i, iterations_count)
         for j in range(image.width):
-            r, g, b = pixels[j, i]
-            shade_of_gray = (r + g + b) // 3
-            draw.text((j * SYMBOL_WIDTH, i * SYMBOL_HEIGHT),
-                      (chars[int(shade_of_gray * interval)]),
-                      font=ImageFont.load_default(), fill=(r, g, b))
+            draw.text((j * SYMBOL_WIDTH, i * SYMBOL_HEIGHT), '#', font=ImageFont.load_default(), fill=pixels[j, i])
 
     return ascii_image
 
@@ -231,34 +176,6 @@ def try_get_mode(mode_from_args: str) -> int:
         return int(mode_input)
     else:
         exit_with_message(INPUT_ERROR_MESSAGE)
-
-
-def visualize_ascii(content: str, mode: int) -> None:
-    """
-    Визуализирует ASCII Art в оконном приложении
-
-    Параметры:
-        content (str): ASCII Art
-        mode (int): режим работы
-    """
-    foreground = DEFAULT_VISUALIZER_FOREGROUND
-    background = DEFAULT_VISUALIZER_BACKGROUND
-    if mode == INVERSION_MODE:
-        foreground, background = background, foreground
-    window = Tk()
-    window.title(TITLE)
-    Label(window, text=content, anchor='w', font='courier 4', bg=background, fg=foreground).pack()
-    window.mainloop()
-
-
-def visualize_ansi(content: Image) -> None:
-    content.show()
-    # show() может не работать на Windows, поэтому дополнительно отображаю в окне Tkinter
-    window = Tk()
-    window.title(TITLE)
-    img = ImageTk.PhotoImage(content)
-    Label(window, image=img).pack()
-    window.mainloop()
 
 
 def print_save_message(result_filename: str) -> None:

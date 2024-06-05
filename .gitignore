@@ -6,3 +6,5 @@
 !ascii_art.py
 !ascii_art_tests.py
 !README.md
+!constants.py
+!visualizer.py
